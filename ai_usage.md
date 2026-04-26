@@ -15,5 +15,8 @@ Pe langa cele doua functii cerute (`parse_condition` si `match_condition`), AI-u
 ## Ce a gresit AI-ul
 - Folosea `atoi` in loc de o conversie stricta, ceea ce nu detecteaza input invalid (am rezolvat cu `parse_long_strict`)
 
+## Ce am invatat
+Am invatat ca AI-ul imi poate oferi un cod destul de bun din start, dar cu cat implementarea se bazeaza pe detalii mai fine, chiar si cu context destul de amplu, inevitabil vor fi lucruri pe care le va rata.
+
 ## Concluzie
-In concluzie, AI-ul m-a ajutat la scheletul initial, dar fara contextul amplu si fisierele atasate, acesta nu ar fi fost in stare sa produca unn punct de plecare atat de bun. Totusi, acesta a avut niste mici scapari, a trebuit sa implementez manual o functie pentru verificarea lui `strtol`, care de asemenea are rolul de a detecta anumite inputuri gresite cum ar fi "123adb"
+In concluzie, AI-ul m-a ajutat la scheletul initial, dar fara contextul amplu si fisierele atasate, acesta nu ar fi fost in stare sa produca un punct de plecare atat de bun. Totusi, acesta a avut niste mici scapari, a trebuit sa implementez manual o functie pentru verificarea lui `strtol`, care de asemenea are rolul de a detecta anumite inputuri gresite cum ar fi "123adb".

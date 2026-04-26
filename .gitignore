@@ -35,9 +35,3 @@ Makefile
 *.dSYM/
 *.idb
 *.pdb
-
-# Runtime district data
-*/reports.dat
-*/district.cfg
-*/logged_district
-active_reports-*
