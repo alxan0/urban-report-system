@@ -2,6 +2,7 @@
 #include "permissions.h"
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -58,6 +59,48 @@ int district_init(const char *name)
     }
 
     return 1;
+}
+
+void district_remove(const char *name, const char *role, const char *user)
+{
+    if (strcmp(role, "manager") != 0)
+    {
+        fprintf(stderr, "Error: manager role required.\n");
+        exit(1);
+    }
+
+    char link_name[256];
+    snprintf(link_name, sizeof(link_name), "active_reports-%s", name);
+    unlink(link_name);
+
+    pid_t pid = fork();
+    if (pid < 0)
+    {
+        perror("fork");
+        exit(1);
+    }
+
+    if (pid == 0)
+    {
+        execl("/bin/rm", "rm", "-rf", name, NULL);
+        perror("execl");
+        exit(1);
+    }
+
+    int status;
+    if (waitpid(pid, &status, 0) < 0)
+    {
+        perror("waitpid");
+        exit(1);
+    }
+
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+    {
+        fprintf(stderr, "Failed to remove district '%s'.\n", name);
+        exit(1);
+    }
+
+    printf("District '%s' removed.\n", name);
 }
 
 void district_log(const char *name, const char *role, const char *user, const char *action)

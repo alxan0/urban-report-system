@@ -18,6 +18,7 @@ static void print_usage(const char *prog)
             "  --list <district>                       List all reports\n"
             "  --view <district> <report_id>           View a specific report\n"
             "  --remove_report <district> <report_id>  Remove a report (manager only)\n"
+            "  --remove_district <district>            Remove a district entirely (manager only)\n"
             "  --update_threshold <district> <value>   Update severity threshold (manager only)\n"
             "  --filter <district> <condition...>      Filter reports by condition\n",
             prog);
@@ -139,7 +140,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    update_symlink(district);
+    if (strcmp(command, "remove_district") != 0)
+        update_symlink(district);
 
     if (strcmp(command, "add") == 0)
     {
@@ -169,6 +171,10 @@ int main(int argc, char *argv[])
         {
             cmd_update_threshold(district, atoi(argv[arg_start]), role, user);
         }
+    }
+    else if (strcmp(command, "remove_district") == 0)
+    {
+        district_remove(district, role, user);
     }
     else if (strcmp(command, "filter") == 0)
     {
