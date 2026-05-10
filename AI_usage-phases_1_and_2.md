@@ -1,5 +1,9 @@
 # Utilizare AI
 
+---
+
+## Phase 1
+
 **Tool folosit**: Claude Sonnet 4.6
 
 ## Prompt
@@ -20,3 +24,15 @@ Am invatat ca AI-ul imi poate oferi un cod destul de bun din start, dar cu cat i
 
 ## Concluzie
 In concluzie, AI-ul m-a ajutat la scheletul initial, dar fara contextul amplu si fisierele atasate, acesta nu ar fi fost in stare sa produca un punct de plecare atat de bun. Totusi, acesta a avut niste mici scapari, a trebuit sa implementez manual o functie pentru verificarea lui `strtol`, care de asemenea are rolul de a detecta anumite inputuri gresite cum ar fi "123adb".
+
+---
+
+## Phase 2
+
+**Tool folosit**: Claude Sonnet 4.6
+
+Am folosit AI-ul in phase 2 pentru a intelege de ce anumite abordari clasice sau aparent simple ar fi fost gresite sau ar fi creat probleme greu de depanat.
+
+Concret, AI-ul m-a ajutat sa inteleg:
+- de ce `SA_RESTART` este necesar pe `SIGUSR1` - fara el, `pause()` se intoarce cu `EINTR` dupa fiecare semnal in loc sa reia asteptarea automat
+- l-am folosit sa imi explice de ce `signal()` nu ar fi fost o alegere buna in locul `sigaction()`, si in timpul discutiei am aflat si de un edge case pe care nu l-as fi gasit singur: pe anumite sisteme Unix, `signal()` reseteaza handler-ul la `SIG_DFL` dupa prima invocare, asa ca primul `SIGUSR1` ar fi functionat, dar al doilea ar fi terminat procesul, ceea ce ar fi fost greu de depistat

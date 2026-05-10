@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <signal.h>
 #include "district.h"
 #include "report.h"
 #include "filter.h"
@@ -146,6 +147,28 @@ int main(int argc, char *argv[])
     if (strcmp(command, "add") == 0)
     {
         cmd_add(district, role, user);
+
+        FILE *f = fopen(".monitor_pid", "r");
+        if (f == NULL)
+        {
+            district_log(district, role, user, "monitor not informed: .monitor_pid not found");
+        }
+        else
+        {
+            int mon_pid = 0;
+            if (fscanf(f, "%d", &mon_pid) == 1)
+            {
+                if (kill(mon_pid, SIGUSR1) < 0)
+                    district_log(district, role, user, "monitor not informed: signal failed");
+                else
+                    district_log(district, role, user, "monitor notified");
+            }
+            else
+            {
+                district_log(district, role, user, "monitor not informed: .monitor_pid not found");
+            }
+            fclose(f);
+        }
     }
     else if (strcmp(command, "list") == 0)
     {
