@@ -10,13 +10,13 @@
 
 void handle_sigusr1(int sig)
 {
-    printf("New report received.\n");
+    printf("msg:New report received.\n");
 }
 
 void handle_sigint(int sig)
 {
     unlink(PID_FILE);
-    printf("Monitor shutting down.\n");
+    printf("quit:Monitor shutting down.\n");
     exit(0);
 }
 
@@ -26,6 +26,22 @@ int main(void)
     char buf[32];
     int len;
     struct sigaction sa;
+    FILE *f;
+    int existing;
+
+    setvbuf(stdout, NULL, _IONBF, 0);
+
+    f = fopen(PID_FILE, "r");
+    if (f != NULL)
+    {
+        if (fscanf(f, "%d", &existing) == 1 && kill(existing, 0) == 0)
+        {
+            printf("err:monitor already running: %d\n", existing);
+            fclose(f);
+            return 1;
+        }
+        fclose(f);
+    }
 
     fd = open(PID_FILE, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd < 0)
@@ -55,7 +71,7 @@ int main(void)
         return 1;
     }
 
-    printf("Monitor started (PID %d).\n", getpid());
+    printf("msg:Monitor started (PID %d).\n", getpid());
 
     while (1)
         pause();
