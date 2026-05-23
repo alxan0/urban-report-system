@@ -7,3 +7,5 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
 
 add_executable(city_hub city_hub.c)
+add_executable(scorer scorer.c)
+target_include_directories(scorer PRIVATE ../src)

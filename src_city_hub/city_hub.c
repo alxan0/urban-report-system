@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 static void run_hub_mon(void)
 {
@@ -80,6 +81,11 @@ static void run_hub_mon(void)
 int main(void)
 {
     char line[256];
+    char *cmd;
+    char *district;
+    char buf[256];
+    int pipefd[2];
+    ssize_t n;
     pid_t pid;
 
     printf("city_hub> ");
@@ -89,7 +95,15 @@ int main(void)
     {
         line[strcspn(line, "\n")] = '\0';
 
-        if (strcmp(line, "start_monitor") == 0)
+        cmd = strtok(line, " ");
+        if (cmd == NULL)
+        {
+            printf("city_hub> ");
+            fflush(stdout);
+            continue;
+        }
+
+        if (strcmp(cmd, "start_monitor") == 0)
         {
             pid = fork();
             if (pid < 0)
@@ -105,13 +119,52 @@ int main(void)
                 printf("Monitor starting...\n");
             }
         }
-        else if (strcmp(line, "quit") == 0 || strcmp(line, "exit") == 0)
+        else if (strcmp(cmd, "calculate_scores") == 0)
+        {
+            printf("--- Workload Report ---\n");
+            while ((district = strtok(NULL, " ")) != NULL)
+            {
+                if (pipe(pipefd) < 0)
+                {
+                    perror("pipe");
+                    continue;
+                }
+
+                pid = fork();
+                if (pid < 0)
+                {
+                    perror("fork");
+                    close(pipefd[0]);
+                    close(pipefd[1]);
+                    continue;
+                }
+
+                if (pid == 0)
+                {
+                    dup2(pipefd[1], STDOUT_FILENO);
+                    close(pipefd[0]);
+                    close(pipefd[1]);
+                    execl("./scorer", "scorer", district, NULL);
+                    perror("execl");
+                    exit(1);
+                }
+
+                close(pipefd[1]);
+                while ((n = read(pipefd[0], buf, sizeof(buf))) > 0)
+                {
+                    write(STDOUT_FILENO, buf, n);
+                }
+                close(pipefd[0]);
+                waitpid(pid, NULL, 0);
+            }
+        }
+        else if (strcmp(cmd, "quit") == 0 || strcmp(cmd, "exit") == 0)
         {
             break;
         }
-        else if (line[0] != '\0')
+        else
         {
-            printf("Unknown command: %s\n", line);
+            printf("Unknown command: %s\n", cmd);
         }
 
         printf("city_hub> ");

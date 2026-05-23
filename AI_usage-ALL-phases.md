@@ -36,3 +36,16 @@ Am folosit AI-ul in phase 2 pentru a intelege de ce anumite abordari clasice sau
 Concret, AI-ul m-a ajutat sa inteleg:
 - de ce `SA_RESTART` este necesar pe `SIGUSR1` - fara el, `pause()` se intoarce cu `EINTR` dupa fiecare semnal in loc sa reia asteptarea automat
 - l-am folosit sa imi explice de ce `signal()` nu ar fi fost o alegere buna in locul `sigaction()`, si in timpul discutiei am aflat si de un edge case pe care nu l-as fi gasit singur: pe anumite sisteme Unix, `signal()` reseteaza handler-ul la `SIG_DFL` dupa prima invocare, asa ca primul `SIGUSR1` ar fi functionat, dar al doilea ar fi terminat procesul, ceea ce ar fi fost greu de depistat
+
+---
+
+## Phase 3
+
+**Tool folosit**: Claude Sonnet 4.6
+
+Am folosit AI-ul in phase 3 pentru a intelege conceptele necesare inainte de a scrie codul.
+
+Concret, AI-ul m-a ajutat sa inteleg:
+- cum functioneaza `pipe()` si `dup2()` impreuna, de ce trebuie inchis capatul de scriere in parinte dupa `fork()`, si ce se intampla daca nu faci asta (parintele nu primeste EOF niciodata, deci `read()` blocheaza programul)
+- diferenta dintre a citi dintr-un pipe byte cu byte fata de a citi in bulk, si de ce alegerea depinde de ce vrei sa faci cu datele. In `run_hub_mon`, monitorul trimite linii cu prefix (`msg:`, `err:`, `quit:`), asa ca trebuie sa reconstruiesc linia completa inainte sa pot decide ce sa fac cu ea, si citirea byte cu byte intr-un buffer pana la `\n` este cea mai usoara si corecta abordare fara un parser mai complex. In `calculate_scores`, `city_hub` nu are nevoie sa il interpreteze, doar sa il afiseze, asa ca citirea in bulk este mai eficienta
+- de ce parintele trebuie sa inchida `pipefd[1]` inainte sa citeasca. Daca nu il inchide, chiar daca toti copiii au terminat, parintele inca are un file descriptor de scriere deschis spre pipe, deci `read()` nu va returna 0 niciodata
